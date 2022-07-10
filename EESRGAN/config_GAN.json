@@ -1,0 +1,104 @@
+{
+    "name": "RRDB_ESRGANx4",
+    "n_gpu": 1,
+    "model": "srgan",
+    "distortion": "sr",
+    "scale": 4,
+    "use_tb_logger": true,
+
+    "network_G": {
+        "which_model_G": "RRDBNet",
+        "in_nc": 3,
+        "out_nc": 3,
+
+        "nf": 64,
+        "nb": 23,
+        "args": {}
+    },
+    "network_D": {
+        "which_model_G": "discriminator_vgg_128",
+        "in_nc": 3,
+        "nf": 64,
+        "args": {}
+    },
+    "data_loader": {
+        "type": "COWCGANFrcnnDataLoader",
+        "args":{
+            
+            "data_dir_GT": "/home/razkey23/cowc-gan/DetectionPatches_256x256/Potsdam_ISPRS/HR/x4/",
+            "data_dir_LQ": "/home/razkey23/cowc-gan/DetectionPatches_256x256/Potsdam_ISPRS/LR/x4/",
+            "batch_size": 1,
+            "shuffle": true,
+            "validation_split": 0.0,
+            "num_workers": 2
+        }
+    },
+    "optimizer": {
+        "type": "SGD",
+        "args":{
+        "lr_G": 0.0001,
+        "weight_decay_G": 0,
+        "beta1_G": 0.9,
+        "beta2_G": 0.99,
+
+        "lr_D": 0.0001,
+        "weight_decay_D": 0,
+        "beta1_D": 0.9,
+        "beta2_D": 0.99
+        }
+    },
+    "loss": "cross_entropy",
+    "metrics": [
+        "accuracy"
+    ],
+    "lr_scheduler": {
+        "type": "MultiStepLR",
+        "args": {
+            "lr_steps": [50000, 100000, 200000, 300000],
+            "lr_gamma": 0.5,
+            "T_period": [250000, 250000, 250000, 250000],
+            "restarts": [250000, 500000, 750000],
+            "restart_weights": [1, 1, 1],
+            "eta_min": 0.0000001
+        }
+    },
+    "train": {
+        "niter": 400000,
+        "warmup_iter": -1,
+        "pixel_criterion": "l1",
+        "pixel_weight": 0.01,
+        "feature_criterion": "l1",
+        "feature_weight": 1,
+
+        "gan_type": "ragan",
+        "gan_weight": 0.001,
+        "D_update_ratio": 1,
+        "D_init_iters": 0,
+        "manual_seed": 10,
+        "val_freq": 1000,
+
+        "save_dir": "saved/",
+        "save_period": 1,
+        "verbosity": 2,
+
+        "monitor": "min val_loss",
+        "early_stop": 10,
+
+        "tensorboard": true
+    },
+    "path": {
+        "models": "saved/save_your_model_in_this_directory/",
+        "pretrain_model_G": "/home/razkey23/cowc-gan/EESRGAN/model/170000_G.pth",
+        "pretrain_model_D": "/home/razkey23/cowc-gan/EESRGAN/model/170000_D.pth",
+        "pretrain_model_FRCNN": "/home/razkey23/cowc-gan/EESRGAN/model/170000_FRCNN.pth",
+        "data_dir_Valid": "/home/razkey23/cowc-gan/EESRGAN/test/",
+        "strict_load": true,
+        "log": "saved/logs",
+        "output_images": "/home/razkey23/cowc-gan/EESRGAN/output/",
+        "Test_Result_SR": "/home/razkey23/cowc-gan/EESRGAN/results/"
+    },
+    "logger": {
+      "print_freq": 100,
+      "save_checkpoint_freq": 1000
+    }
+}
